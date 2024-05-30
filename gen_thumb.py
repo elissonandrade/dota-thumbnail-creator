@@ -59,7 +59,6 @@ def preview_gen(widget, image_ref, reactionPath, reactionFile, thumbText, heroPa
     textLay = pdb.gimp_text_fontname(image_ref,None,30.0,30.0,thumbText.get_text(startB,endB),0, TRUE,62,POINTS,pdb.gimp_context_get_font())
     pdb.gimp_text_layer_set_justification(textLay, TEXT_JUSTIFY_CENTER)
     pdb.gimp_text_layer_resize(textLay, 800, 650)
-    pdb.gimp_message("Good here")
     
     window = gtk.Window()
     window.set_title("Preview")
@@ -72,7 +71,7 @@ def preview_gen(widget, image_ref, reactionPath, reactionFile, thumbText, heroPa
     gtk.main_quit()
     #window.show_all()
 
-def gen_thumb(_image, _drawable):
+def gen_thumb(_image, _drawable, _reactionPath, _heroPath, _thumbText):
     window = gtk.Window()
     window.set_title("Generate Video Thumbnail")
     window.connect('destroy',  close_plugin_window)
@@ -83,7 +82,7 @@ def gen_thumb(_image, _drawable):
     
     hbReaction.pack_start(lbReactionDir, False, False, 0)
     
-    lbReactionPath = gtk.Label("")
+    lbReactionPath = gtk.Label(_reactionPath)
     
     hbReaction.pack_start(lbReactionPath, False, False, 0)
     
@@ -99,6 +98,9 @@ def gen_thumb(_image, _drawable):
     cbReaction = gtk.ComboBox()
     lsReaction = gtk.ListStore(str)
     cbReaction.set_model(lsReaction)
+
+    if _reactionPath.strip() != "" :
+        populate_combobox(_reactionPath, cbReaction, lsReaction)
 
     cell = gtk.CellRendererText()
     cbReaction.pack_start(cell, True)
@@ -116,8 +118,10 @@ def gen_thumb(_image, _drawable):
 
     txtview = gtk.TextView()
     textbuffer = txtview.get_buffer()
-    textbuffer.set_text("Enter the text that will be centered on the thumbnail here")
-    
+    if not _thumbText:
+        textbuffer.set_text("Enter the text that will be centered on the thumbnail here")
+    else:
+        textbuffer.set_text(_thumbText)
     hbText.pack_start(txtview, True, True, 0)
 
     window_box.pack_start(hbText, True, True, 0)
@@ -127,7 +131,7 @@ def gen_thumb(_image, _drawable):
     
     hbHeroDir.pack_start(lbHeroesDir, False, False, 0)
     
-    lbHeroPath = gtk.Label("")
+    lbHeroPath = gtk.Label(_heroPath)
     
     hbHeroDir.pack_start(lbHeroPath, False, False, 0)
     
@@ -143,6 +147,9 @@ def gen_thumb(_image, _drawable):
     cbHeroes = gtk.ComboBox()
     lsHeroes = gtk.ListStore(str)
     cbHeroes.set_model(lsHeroes)
+    
+    if _heroPath.strip() != "" :
+        populate_combobox(_heroPath, cbHeroes, lsHeroes)
 
     cellHero = gtk.CellRendererText()
     cbHeroes.pack_start(cellHero, True)
@@ -177,6 +184,9 @@ register(
           [
               (PF_IMAGE, "image", "Input image", None),
               (PF_DRAWABLE, "drawable", "Input drawable", None),
+              (PF_DIRNAME, "reactionPath", "Reactions directory", ""),
+              (PF_DIRNAME, "heroPath", "Heroes directory", ""),
+              (PF_STRING, "thumbText", "Thumb Text", "")
           ],
           [],
           gen_thumb, menu="<Image>/Filters")
